@@ -1,12 +1,6 @@
-
-include_directories(
-    ${RAPIDJSON_INCLUDES}
-    ${BASE58_INCLUDES}
-    ${SCRYPT_INCLUDES}
-    ${BLAKE2_INCLUDES}
-    ${SODIUM_INCLUDES}
-)
-
+######################################################################################
+## Build minilockcpp library
+######################################################################################
 add_library(minilockcpp STATIC
     minilock.h
     minilock.cc
@@ -21,11 +15,12 @@ add_library(minilockcpp STATIC
     logging.h
     logging.cc
     utils.cc
-    utils.h
-)
-
-target_compile_definitions(minilockcpp PRIVATE BUFFERSIZE=${BASE64_BUFFER_SIZE})
-
+    utils.h)
+target_include_directories(minilockcpp PRIVATE ${RAPIDJSON_INCLUDES}
+    ${BASE58_INCLUDES}
+    ${SCRYPT_INCLUDES}
+    ${BLAKE2_INCLUDES}
+    ${SODIUM_INCLUDES})
 target_link_libraries(minilockcpp stdc++fs
     ${BLAKE2_LIBRARY}
     ${SODIUM_LIBRARY}
@@ -33,3 +28,4 @@ target_link_libraries(minilockcpp stdc++fs
     ${BASE58_LIBRARY}
     ${BASE64_LIBRARY}
 )
+#target_compile_definitions(minilockcpp PRIVATE BUFFERSIZE=${BASE64_BUFFER_SIZE})
