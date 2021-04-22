@@ -20,9 +20,6 @@ option(BUILD_UNITTESTS "Build unit tests" ON)
 ######################################################################################
 ## Find 3rd party packages
 ######################################################################################
-find_package(Base58Src REQUIRED)
-#find_package(Base64Src REQUIRED)
-find_package(ScryptSrc REQUIRED)
 find_package(Blake2Src REQUIRED)
 find_package(SodiumSrc REQUIRED)
 find_package(RapidJsonSrc REQUIRED)

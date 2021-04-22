@@ -1,9 +1,10 @@
 #include "minilock.h"
 #include "exception.h"
 #include "logging.h"
+#include "base58.h"
 
-#include <libbase58.h>
-#include <libscrypt.h>
+//#include <libbase58.h>
+//#include <libscrypt.h>
 #include <blake2.h>
 #include <sodium.h>
 #include <rapidjson/document.h>
@@ -13,6 +14,7 @@
 
 // ToDo: remove
 #include <experimental/filesystem>
+//#include "utils.h"
 
 namespace minilockcpp
 {
@@ -80,18 +82,31 @@ bool minilock::initialize(const std::string& email, const std::string& password)
         throw general_error() << "unable to create blake2s hash";
     }
 
-    if(libscrypt_scrypt(password_hash.data(),
-                        blake2s_constant::BLAKE2S_OUTBYTES,
-                        reinterpret_cast<const uint8_t*>(email.c_str()),
-                        email.size(),
-                        scrypt_constant::scrypt_cpu_ram_cost,
-                        scrypt_constant::scrypt_ram_cost,
-                        scrypt_constant::scrypt_parallelisation,
-                        secretkey.data(),
-                        crypto_box_PUBLICKEYBYTES))
+    if(0 != crypto_pwhash_scryptsalsa208sha256_ll(password_hash.data(),
+        blake2s_constant::BLAKE2S_OUTBYTES,
+        reinterpret_cast<const uint8_t*>(email.c_str()),
+        email.size(),
+        scrypt_constant::scrypt_cpu_ram_cost,
+        scrypt_constant::scrypt_ram_cost,
+        scrypt_parallelisation,
+        secretkey.data(),
+        crypto_box_secretkeybytes()))
     {
         throw general_error() << "unable to generate secret key";
     }
+
+    //if(libscrypt_scrypt(password_hash.data(),
+    //                    blake2s_constant::BLAKE2S_OUTBYTES,
+    //                    reinterpret_cast<const uint8_t*>(email.c_str()),
+    //                    email.size(),
+    //                    scrypt_constant::scrypt_cpu_ram_cost,
+    //                    scrypt_constant::scrypt_ram_cost,
+    //                    scrypt_constant::scrypt_parallelisation,
+    //                    secretkey.data(),
+    //                    crypto_box_secretkeybytes()))
+    //{
+    //    throw general_error() << "unable to generate secret key";
+    //}
 
     if(crypto_scalarmult_curve25519_base(publickey.data(), secretkey.data()))
     {
@@ -106,8 +121,10 @@ bool minilock::initialize(const std::string& email, const std::string& password)
     std::copy(publickey.begin(), publickey.end(), id.begin());
     std::copy(id_hash.begin(), id_hash.end(), id.data() + minilock_constant::publickey_bytes);
 
-    b58enc(b58_id_buffer.data(), &b58id_len, id.data(), id.size());
-    this->id = std::string(b58_id_buffer.data());
+    //this->id = base58::base58_encode(id.data(), id.data() + id.size());
+    std::vector<uint8_t> vID(id.begin(), id.end());
+    base58::base58_encode(vID, this->id);
+
     initialized = true;
 
     log::verbose() << "Session initialized!" << std::endl;

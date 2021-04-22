@@ -9,6 +9,7 @@ include(GoogleTest)
 ## Build TestSuite
 ######################################################################################
 add_executable(test_minilock
+    test_base58.cc
     test_authentication.cc
     test_one_recipient.cc
     test_two_recipients.cc
