@@ -1,3 +1,23 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+ 
+
+
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
@@ -45,12 +65,12 @@ Page {
 
         Image {
             id: logoutImage
-            Layout.maximumHeight: 30
-            Layout.maximumWidth: 30
+            Layout.maximumHeight: 40
+            Layout.maximumWidth: 40
             Layout.rightMargin: 10
             Layout.topMargin: 35
             Layout.alignment: Qt.AlignRight
-            source: "icons/logout.png"
+            source: "icons/logout.svg"
 
             MouseArea {
                 anchors.fill: parent
@@ -126,8 +146,8 @@ Page {
             }
             Button {
                 text: "..."
-                Layout.maximumHeight: 35
-                Layout.maximumWidth: 30
+                Layout.maximumHeight: 40
+                Layout.maximumWidth: 40
                 onClicked: folderDialog.open();
             }
         }
@@ -145,9 +165,8 @@ Page {
     FolderDialog {
         id: folderDialog
         currentFolder: ""
-        folder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0] + "/.aaaaa/"
+        folder: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
 
-        // ToDo: move urlToPath
         function urlToPath(urlString) {
             var s
             if (urlString.startsWith("file:///")) {

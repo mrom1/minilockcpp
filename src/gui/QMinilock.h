@@ -1,4 +1,25 @@
-#pragma once
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
+#ifndef _MINILOCKCPP_GUI_QMINILOCK_H_
+#define _MINILOCKCPP_GUI_QMINILOCK_H_
+
 
 #include <QObject>
 #include <QThread>
@@ -17,7 +38,8 @@ class QMinilock : public QObject
     Q_PROPERTY(std::vector<QString> recipients WRITE setRecipients NOTIFY recipientsChanged)
 
 public:
-    explicit QMinilock (QObject* parent = nullptr) : QObject(parent) { }
+    explicit QMinilock(QObject* parent = nullptr);
+    ~QMinilock();
 
     Q_INVOKABLE bool initialize(QString email, QString password);
     Q_INVOKABLE void encryptFiles(QList<QString> fileNames, bool random_filename, QString sourceDirectory, QString targetDirectory);
@@ -60,3 +82,6 @@ private:
     float password_entropy = 0.0;
     bool processing_finished = false;
 };
+
+
+#endif // _MINILOCKCPP_GUI_QMINILOCK_H_

@@ -1,0 +1,10 @@
+{
+    "name": "minilockcpp",
+    "version": "1.0.0",
+    "dependencies": [
+        "libsodium",
+        "rapidjson",
+        "gtest"
+    ],
+    "builtin-baseline": "307ac18b08e4125d3c521a86b7d7b317629be277"
+}

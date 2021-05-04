@@ -8,8 +8,8 @@
         <file>ProcessDecryptionPopup.qml</file>
         <file>RecipientsPopup.qml</file>
 		<file>icons/minilock.png</file>
-		<file>icons/logout.png</file>
-		<file>icons/show_hide_password.png</file>
-		<file>icons/show_password.png</file>
+		<file>icons/logout.svg</file>
+		<file>icons/show_password_enabled.svg</file>
+		<file>icons/show_password_disabled.svg</file>
     </qresource>
 </RCC>

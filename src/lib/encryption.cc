@@ -1,15 +1,35 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
+
 #include "encryption.h"
 #include "logging.h"
 #include "exception.h"
+#include "blake2s_wrapper.hpp"
 
-#include <blake2.h>
 #include <sodium.h>
 
 #include <fstream>
 #include <random>
 #include <algorithm>
 
-namespace minilockcpp {
+using namespace minilockcpp;
 
 void encryption::encrypt(const std::string& source_filename,
                          const std::string& id,
@@ -51,7 +71,7 @@ void encryption::encrypt(const std::string& source_filename,
     ssbuffer << ofs.rdbuf();
 
     std::array<uint8_t, blake2s_constant::BLAKE2S_OUTBYTES> filehash;
-    blake2s(filehash.data(), ssbuffer.str().c_str(), nullptr, filehash.size(), content_size, 0);
+    blake2s_wrapper::blake2s_hash(filehash.data(), ssbuffer.str().c_str(), nullptr, filehash.size(), content_size, 0);
 
     std::string json_header = generate_header(id,
                                               filehash.data(),
@@ -157,6 +177,4 @@ std::string encryption::random_filename()
      std::shuffle(str.begin(), str.end(), generator);
 
      return str.substr(0, 32);
-}
-
 }

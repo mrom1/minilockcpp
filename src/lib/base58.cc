@@ -1,13 +1,31 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
+
 #include "base58.h"
-#include <assert.h>
 #include <string.h>
 
 using namespace minilockcpp;
 
 static const char* base58Characters = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-
-bool base58::base58_encode(const std::vector<unsigned char>& input, std::string& result) 
+bool base58::base58_encode(const std::vector<uint8_t>& input, std::string& result)
 {
     const unsigned char* begin_ptr = input.data();
     const unsigned char* end_ptr = input.data() + input.size();
@@ -43,28 +61,38 @@ bool base58::base58_encode(const std::vector<unsigned char>& input, std::string&
     }
 
     auto it = b58.begin() + (size - length);
+
     while (it != b58.end() && *it == 0)
+    {
         it++;
+    }
 
 
     result.reserve(zeroes + (b58.end() - it));
     result.assign(zeroes, '1');
+
     while (it != b58.end())
+    {
         result += base58Characters[*(it++)];
+    }
 
     return true;
 }
 
-bool base58::base58_decode(const std::string& input, std::vector<unsigned char>& vch) 
+bool base58::base58_decode(const std::string& input, std::vector<uint8_t>& result)
 {
     const char* psz = input.c_str();
 
     while (*psz && isspace(*psz))
+    {
         psz++;
+    }
 
     int zeroes = 0;
     int length = 0;
-    while (*psz == '1') {
+
+    while (*psz == '1') 
+    {
         zeroes++;
         psz++;
     }
@@ -81,11 +109,13 @@ bool base58::base58_decode(const std::string& input, std::vector<unsigned char>&
 
         int carry = ch - base58Characters;
         int i = 0;
-        for (auto it = b256.rbegin(); (carry != 0 || i < length) && (it != b256.rend()); ++it, ++i) {
+        for (auto it = b256.rbegin(); (carry != 0 || i < length) && (it != b256.rend()); ++it, ++i) 
+        {
             carry += 58 * (*it);
             *it = carry % 256;
             carry /= 256;
         }
+
         if(carry != 0) return false;
 
         length = i;
@@ -93,22 +123,29 @@ bool base58::base58_decode(const std::string& input, std::vector<unsigned char>&
     }
 
     while (isspace(*psz))
+    {
         psz++;
+    }
 
     if (*psz != 0)
+    {
         return false;
-
+    }
 
     auto it = b256.begin() + (size - length);
+    
     while (it != b256.end() && *it == 0)
+    {
         it++;
+    }
 
-
-    vch.reserve(zeroes + (b256.end() - it));
-    vch.assign(zeroes, 0x00);
+    result.reserve(zeroes + (b256.end() - it));
+    result.assign(zeroes, 0x00);
 
     while (it != b256.end())
-        vch.push_back(*(it++));
+    {
+        result.push_back(*(it++));
+    }
 
     return true;
 }

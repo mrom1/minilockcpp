@@ -1,17 +1,33 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
 #include "header.h"
 #include "exception.h"
 #include "logging.h"
 #include "base58.h"
+#include "base64.h"
 
 #include <rapidjson/document.h>
 #include <sodium.h>
-//#include <libbase58.h>
-#include <blake2.h>
-
 #include <sstream>
 
-namespace minilockcpp
-{
+using namespace minilockcpp;
 
 bool header::parse_header(const std::string& json_header,
     const uint8_t* secretkey)
@@ -32,7 +48,7 @@ bool header::parse_header(const std::string& json_header,
         throw invalid_minilock_version() << s;
     }
 
-    std::string ephemeralPublicKey = base64_decode(dJsonHeader["ephemeral"].GetString());
+    std::string ephemeralPublicKey = base64::base64_decode(dJsonHeader["ephemeral"].GetString());
     const rapidjson::Value& decryptInfoJsonObject = dJsonHeader["decryptInfo"];
     const unsigned int decryptInfoCount = decryptInfoJsonObject.MemberCount();
     std::vector<std::string> b64UniqueNonce;
@@ -50,8 +66,8 @@ bool header::parse_header(const std::string& json_header,
 
     for (size_t i = 0; i < decryptInfoCount; i++)
     {
-        uniqueNonce = base64_decode(b64UniqueNonce[i]);
-        std::string cipher = base64_decode(decryptObject[i]);
+        uniqueNonce = base64::base64_decode(b64UniqueNonce[i]);
+        std::string cipher = base64::base64_decode(decryptObject[i]);
         std::vector<uint8_t> decrypted_jsonDecryptInfo(cipher.size() - minilock_constant::padding_bytes, 0);
         if (!crypto_box_open_easy(decrypted_jsonDecryptInfo.data(),
             reinterpret_cast<const uint8_t*>(cipher.c_str()), cipher.size(),
@@ -82,7 +98,7 @@ bool header::parse_header(const std::string& json_header,
     }
 
     std::string senderID = dJsonDecryptInfo["senderID"].GetString();
-    std::string encrypted_jsonFileInfo = base64_decode(dJsonDecryptInfo["fileInfo"].GetString());
+    std::string encrypted_jsonFileInfo = base64::base64_decode(dJsonDecryptInfo["fileInfo"].GetString());
     std::array<uint8_t, minilock_constant::publickey_bytes + minilock_constant::uid_checksum_length> decodedSenderPublic;
     size_t actPos = decodedSenderPublic.size();
     std::vector<uint8_t> vDecodedSenderPublic;
@@ -110,9 +126,9 @@ bool header::parse_header(const std::string& json_header,
         throw json_parse_error() << s;
     }
 
-    std::string strFileKey = base64_decode(dJsonFileInfo["fileKey"].GetString());
-    std::string strFileNonce = base64_decode(dJsonFileInfo["fileNonce"].GetString());
-    std::string strFileHash = base64_decode(dJsonFileInfo["fileHash"].GetString());
+    std::string strFileKey = base64::base64_decode(dJsonFileInfo["fileKey"].GetString());
+    std::string strFileNonce = base64::base64_decode(dJsonFileInfo["fileNonce"].GetString());
+    std::string strFileHash = base64::base64_decode(dJsonFileInfo["fileHash"].GetString());
 
     std::vector<uint8_t> fh = std::vector<uint8_t>(strFileHash.begin(), strFileHash.end());
     std::vector<uint8_t> chunkNumber(minilock_constant::chunk_number_bytes, 0);
@@ -140,7 +156,7 @@ std::string header::generate_header(const std::string& sender_id,
     std::copy(file_nonce.begin(), file_nonce.end(), full_nonce.data());
     std::copy(chunkNum.begin(), chunkNum.end(), full_nonce.data() + minilock_constant::filenonce_bytes);
 
-    std::string json_Object = "{\"version\":1,\"ephemeral\":\"" + base64_encode(senderEphemeralPublic.data(), minilock_constant::publickey_bytes) + "\",";
+    std::string json_Object = "{\"version\":1,\"ephemeral\":\"" + base64::base64_encode(senderEphemeralPublic.data(), minilock_constant::publickey_bytes) + "\",";
     std::string json_decryptInfo = "\"decryptInfo\":{";
     std::string json_fileInfo = "\"fileInfo\":";
     std::string base64_decryptInfo;
@@ -150,9 +166,9 @@ std::string header::generate_header(const std::string& sender_id,
 
     for (size_t i = 0; i < recipients.size(); i++)
     {
-        std::string strJsonFileInfo = "{\"fileKey\":\"" + base64_encode(file_key.data(), minilock_constant::filekey_bytes)
-            + "\",\"fileNonce\":\"" + base64_encode(file_nonce.data(), minilock_constant::filenonce_bytes)
-            + "\",\"fileHash\":\"" + base64_encode(filehash, blake2s_constant::BLAKE2S_OUTBYTES)
+        std::string strJsonFileInfo = "{\"fileKey\":\"" + base64::base64_encode(file_key.data(), minilock_constant::filekey_bytes)
+            + "\",\"fileNonce\":\"" + base64::base64_encode(file_nonce.data(), minilock_constant::filenonce_bytes)
+            + "\",\"fileHash\":\"" + base64::base64_encode(filehash, minilock_constant::blake2s_hashbytes)
             + "\"}";
 
         std::vector<uint8_t> jsonFileInfo(strJsonFileInfo.size());
@@ -168,7 +184,7 @@ std::string header::generate_header(const std::string& sender_id,
         
         std::vector<uint8_t> vDecodedRecipientPublic;
         base58::base58_decode(recipients[i], vDecodedRecipientPublic);
-        std::copy(vDecodedRecipientPublic.begin(), vDecodedRecipientPublic.end(), recipientPublic.begin());
+        std::copy_n(vDecodedRecipientPublic.begin(), recipientPublic.size(), recipientPublic.begin());
 
         if (0 != crypto_box_easy(encrypted_jsonFileInfo.data(), jsonFileInfo.data(), jsonFileInfo.size(), uniqueNonce.data(), recipientPublic.data(), secretkey))
         {
@@ -176,8 +192,8 @@ std::string header::generate_header(const std::string& sender_id,
             throw general_encryption_error() << "Encryption Error: unable to encrypt JSON fileInfo section.";
         }
 
-        std::string base64_uniqueNonce = base64_encode(uniqueNonce.data(), uniqueNonce.size());
-        std::string base64_fileInfo = base64_encode(encrypted_jsonFileInfo.data(), static_cast<unsigned int>(encrypted_jsonFileInfo.size()));
+        std::string base64_uniqueNonce = base64::base64_encode(uniqueNonce.data(), uniqueNonce.size());
+        std::string base64_fileInfo = base64::base64_encode(encrypted_jsonFileInfo.data(), static_cast<unsigned int>(encrypted_jsonFileInfo.size()));
         std::string strJsonDecryptInfo_N = "{\"senderID\":\"" + sender_id + "\",\"recipientID\":\"" + recipients[i] + "\"," + json_fileInfo + "\"" + base64_fileInfo + "\"}";
 
         std::vector<uint8_t> jsonDecryptInfo_N(strJsonDecryptInfo_N.size());
@@ -190,7 +206,7 @@ std::string header::generate_header(const std::string& sender_id,
             throw general_encryption_error() << "Encryption Error: unable to encrypt JSON decryptInfo section.";
         }
 
-        std::string base64_decryptInfo_N = base64_encode(encrypted_jsonDecryptInfo_N.data(), static_cast<unsigned int>(encrypted_jsonDecryptInfo_N.size()));
+        std::string base64_decryptInfo_N = base64::base64_encode(encrypted_jsonDecryptInfo_N.data(), static_cast<unsigned int>(encrypted_jsonDecryptInfo_N.size()));
         base64_decryptInfo = base64_decryptInfo + "\"" + base64_uniqueNonce + "\":\"" + base64_decryptInfo_N + "\",";
     }
 
@@ -198,6 +214,4 @@ std::string header::generate_header(const std::string& sender_id,
     json_Object = json_Object + json_decryptInfo + base64_decryptInfo;
 
     return json_Object;
-}
-
 }

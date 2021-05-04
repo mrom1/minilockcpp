@@ -1,6 +1,25 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
+
+#include <gtest/gtest.h>
 #include <minilock.h>
-#include <blake2.h>
-#include "gtest/gtest.h"
 #include <exception.h>
 
 using namespace minilockcpp;
@@ -28,23 +47,23 @@ TEST(test_authentication, test_invalid_password)
         std::string filename_encrypted = "random_1MB.minilock";
         std::string correct_password = "cytosine stratigraphic megajoules relaxingly dourly timing contractions";
         std::string invalid_password = "cytosine stratigraphic megajoules relaxingly dourly timing different";
-
+        
         std::vector<unsigned char> data(1000*1000);
         std::generate(begin(data), end(data), std::rand);
-
+        
         std::ofstream ofs(filename, std::ios::binary);
         ofs.write(reinterpret_cast<char*>(&data[0]), static_cast<long>(data.size()));
         ofs.close();
-
+        
         minilock first_session("asdf@asdf.de", correct_password);
         EXPECT_TRUE(first_session.encrypt_file(filename));
         remove(filename.c_str());
-
+        
         minilock second_session;
         second_session.set_log_level(log::log_level::none);
         second_session.initialize("asdf@asdf.de", invalid_password);
         EXPECT_THROW(second_session.decrypt_file(filename_encrypted), invalid_authentication);
-
+        
         remove(filename.c_str());
         remove(filename_encrypted.c_str());
     }

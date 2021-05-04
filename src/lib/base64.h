@@ -1,5 +1,5 @@
 /************************************************************************
- * This file is part of the minilockcpp distribution 
+ * This file is part of the minilockcpp distribution
  * (https://github.com/mrom1/minilockcpp).
  * Copyright (c) 2021 mrom1.
  *
@@ -17,8 +17,9 @@
  ************************************************************************/
 
 
-#ifndef _MINILOCKCPP_BASE58_H_
-#define _MINILOCKCPP_BASE58_H_
+#ifndef _MINILOCKCPP_BASE64_H_
+#define _MINILOCKCPP_BASE64_H_
+
 
 #include <vector>
 #include <string>
@@ -27,35 +28,34 @@ namespace minilockcpp
 {
 
 /**
- * @brief Static base58 utilities class for decoding and encoding.
+ * @brief Static base64 utilities class for decoding and encoding.
 */
-class base58 final
+class base64 final
 {
 public:
     /**
-     * @brief Encode vector of unsigned 8 bit integers to a string.
-     * @param input vector of unsigned 8 bit integers.
-     * @param result encoded result as a string.
-     * @return returns true if successful, otherwise false.
+     * @brief Encode unsigned 8 bit integers to a string.
+     * @param bytes_to_encode pointer to unsigned 8 bit integer array.
+     * @param in_len length of input array.
+     * @return returns base64 encoded string.
     */
-    static bool base58_encode(const std::vector<uint8_t>& input, std::string& result);
+    static std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 
     /**
-     * @brief Decode a string into a vector of unsigned 8 bit integers.
-     * @param input string to decode.
-     * @param result output vector.
-     * @return returns true if successful, otherwise false.
+     * @brief Decode encoded base64 string.
+     * @param encoded_string string to decode.
+     * @return returns decoded base64 string.
     */
-    static bool base58_decode(const std::string& input, std::vector<uint8_t>& result);
+    static std::string base64_decode(std::string const& encoded_string);
 
 private:
     /**
      * @brief Prevent construction of this class. All methods are static.
     */
-    base58() = default;
+    base64() = default;
 };
 
 } // namespace minilockcpp
 
 
-#endif // _MINILOCKCPP_BASE58_H_
+#endif // _MINILOCKCPP_BASE64_H_

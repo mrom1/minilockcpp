@@ -1,17 +1,43 @@
+/************************************************************************
+ * This file is part of the minilockcpp distribution
+ * (https://github.com/mrom1/minilockcpp).
+ * Copyright (c) 2021 mrom1.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ ************************************************************************/
+
+
+
 #include "logging.h"
 #include <iomanip>
 #include <chrono>
 
-namespace minilockcpp
-{
-std::shared_ptr<log> log::instance;
+using namespace minilockcpp;
+
+std::shared_ptr<minilockcpp::log> log::instance;
 
 static std::ostream& add_time(std::ostream& stream)
 {
     std::time_t helper = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+#ifdef __linux__
     struct tm tm;
     localtime_r(&helper, &tm);
     stream << std::put_time(&tm, "%Y-%m-%d %T ");
+#elif _WIN32
+    struct tm* tm;
+    tm = localtime(&helper);
+    stream << std::put_time(tm, "%Y-%m-%d %T ");
+#endif
     return stream;
 }
 
@@ -48,7 +74,7 @@ log::log(): null_stream(&null_buffer)
 {
 }
 
-log& log::get_instance()
+minilockcpp::log& log::get_instance()
 {
     if (!instance)
     {
@@ -73,6 +99,4 @@ void log::_set_log_level(log::log_level level)
         case log_level::verbose: debug_stream = &null_stream;
         default: break;
     }
-}
-
 }
