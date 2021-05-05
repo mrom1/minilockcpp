@@ -26,6 +26,7 @@
 #include <rapidjson/document.h>
 #include <sodium.h>
 #include <sstream>
+#include <algorithm>
 
 using namespace minilockcpp;
 
