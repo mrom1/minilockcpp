@@ -1,30 +1,43 @@
 # minilockcpp
-multithread C++ minilock (cryptography) library port with a Qt5 GUI
+This project is a crossplatform C++ port of the minilock javascript library with a Qt5 GUI.
 
 ## How to build
-
-### Linux
-
-```cmake
+```console
 git clone https://github.com/mrom1/minilockcpp.git
 cd minilockcpp
-mkdir build && cd build
-cmake ..
-make
+cmake -S. -Bbuild -DQt5_DIR=<PATH_TO_YOUR_QT_DIR_CONTAINING_CMAKE_FILES>
+cmake --build build
 ```
 
-### Windows
-
-To be done. 
+## Run tests
+```console
+cd build
+ctest 
+```
 
 ## How to use the library
-Documentation will follow soon.
+Simple example showing how to encrypt / decrypt a file:  
+```
+#include <minilock.h>
 
-## How to use the GUI
-Documentation will follow soon.
+auto session = new minilockcpp::minilock("your@email.com", "your_password");
+
+// Using default parameters, check out the API for all arguments
+session->encrypt_file("myfile.dat");
+
+// Using default parameters, check out the API for all arguments
+session->decrypt_file("myfile.dat");
+
+// Cleanup
+delete session;
+```
 
 
-## ToDo's
-- [ ] Add Documentation
-- [ ] Update external dependencies lookup for Windows users
+## ToDo
+
+- [x] Add Documentation
+- [x] Update external dependencies lookup for Windows users
 - [ ] Add Qt GUI tests
+- [ ] Seperate library and gui into different repositories
+- [ ] Add Github Actions
+
