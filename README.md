@@ -1,4 +1,7 @@
 # minilockcpp
+![windows-build](https://github.com/mrom1/minilockcpp/actions/workflows/windows.yml/badge.svg)
+![linux-build](https://github.com/mrom1/minilockcpp/actions/workflows/linux.yml/badge.svg)
+
 This project is a crossplatform multi threaded C++ port of the minilock javascript library with a Qt5 GUI.
 
 ## Preview
@@ -46,6 +49,6 @@ delete session;
 - [x] Add Documentation
 - [x] Update external dependencies lookup for Windows users
 - [ ] Add Qt GUI tests
-- [ ] Seperate library and gui into different repositories
-- [ ] Add Github Actions
+- [x] Add Github Actions
+- [ ] Add CLI to use the library without a GUI
 
