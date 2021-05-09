@@ -1,0 +1,50 @@
+# Workflow for windows
+
+name: windows-build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Setup MSBuild
+      - name: Setup MSBuild and add to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+        id: setup_msbuild
+      
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.8
+      
+      # Configure CMake
+      - name: Configure CMake
+        run: cmake -S. -Bbuild -DBUILD_GUI=OFF
+      
+      # Runs Build
+      - name: Build
+        run: cmake --build build --release
+
+      # Test
+      - name: Test
+        run: |
+          cd build
+          ctest --output-on-failure --verbose
+        
+      

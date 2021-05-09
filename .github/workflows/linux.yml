@@ -1,0 +1,31 @@
+# Workflow for linux
+
+name: linux-build
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      run: cmake -S. -Bbuild -DBUILD_GUI=OFF
+
+    - name: Build
+      run: cmake --build build --config release
+
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure --verbose
