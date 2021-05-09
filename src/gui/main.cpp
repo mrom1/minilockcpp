@@ -18,13 +18,16 @@
 
 
 
-#include "QMinilock.h"
+#if defined(_WIN32) || defined(WIN32)
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 
+
+#include "QMinilock.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include <thread>
 
 int main(int argc, char *argv[])
 {

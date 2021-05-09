@@ -22,4 +22,7 @@
 ## add subdirectories
 ###########################################################################
 add_subdirectory(lib)
-add_subdirectory(gui)
+
+if(BUILD_GUI)
+    add_subdirectory(gui)
+endif(BUILD_GUI)

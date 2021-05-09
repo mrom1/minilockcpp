@@ -40,15 +40,19 @@ template <typename T> static float ShannonEntropy(T data[],int elements){
 }
 
 QMinilock::QMinilock(QObject* parent /* = nullptr */)
-    : QObject(parent)
+    : QObject(parent),
+      thread(nullptr)
 {
-    thread = new QThread;
 }
 
 
 QMinilock::~QMinilock()
 {
-    delete thread;
+    if (thread != nullptr)
+    {
+        thread->quit();
+        thread->wait();
+    }
 }
 
 void QMinilock::setPasswordEntropy(QString password) {
@@ -69,8 +73,9 @@ void QMinilock::setRecipients(const std::vector<QString>& v)
     }
 }
 
-void QMinilock::cancleAll() {
-    if(thread->isRunning())
+void QMinilock::cancleAll() 
+{
+    if(thread != nullptr && thread->isRunning())
     {
         thread->requestInterruption();
     }
@@ -99,17 +104,19 @@ void QMinilock::encryptFiles(QList<QString> fileNames, bool random_filename, QSt
     emit statusTextChanged();
     emit progressedFilesChanged(progressed_files);
 
-    Worker* worker = new Worker(&session, fileNames, random_filename, sourceDirectory, targetDirectory, recipients);
+    thread = new QThread;
+
+    QMinilockWorker* worker = new QMinilockWorker(&session, fileNames, random_filename, sourceDirectory, targetDirectory, recipients);
     worker->moveToThread(thread);
 
     connect(thread, SIGNAL(started()), worker, SLOT(encryptFiles()));
     connect(worker, SIGNAL(statusTextChanged(QString)), this, SLOT(setStatusText(QString)));
-    connect(worker, &Worker::progressedFileFinished, this, [this]() {
+    connect(worker, &QMinilockWorker::progressedFileFinished, this, [this]() 
+    {
         progressed_files++;
         emit progressedFilesChanged(progressed_files);
-    });
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
+    });    
+    connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));    
     connect(thread, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     thread->start();
@@ -123,16 +130,18 @@ void QMinilock::decryptFiles(QList<QString> fileNames, QString sourceDirectory, 
     emit statusTextChanged();
     emit progressedFilesChanged(progressed_files);
 
-    Worker* worker = new Worker(&session, fileNames, sourceDirectory, targetDirectory);
+    thread = new QThread;
+
+    QMinilockWorker* worker = new QMinilockWorker(&session, fileNames, sourceDirectory, targetDirectory);
     worker->moveToThread(thread);
 
     connect(thread, SIGNAL(started()), worker, SLOT(decryptFiles()));
     connect(worker, SIGNAL(statusTextChanged(QString)), this, SLOT(setStatusText(QString)));
-    connect(worker, &Worker::progressedFileFinished, this, [this]() {
+    connect(worker, &QMinilockWorker::progressedFileFinished, this, [this]() 
+    {
         progressed_files++;
         emit progressedFilesChanged(progressed_files);
-    });
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    });    
     connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
     connect(thread, SIGNAL(finished()), worker, SLOT(deleteLater()));
 

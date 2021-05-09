@@ -1,7 +1,7 @@
 include(ExternalProject)
 
 SET(BLAKE2_SEARCH_PATH
-    "${PROJECT_SOURCE_DIR}/extern/libb2")
+    "${CMAKE_BINARY_DIR}/third-party/libb2")
 
 if(WIN32)
     ExternalProject_Add(

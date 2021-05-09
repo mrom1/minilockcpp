@@ -40,7 +40,7 @@ set(CMAKE_AUTOUIC ON)
 
 add_executable(minilock main.cpp 
     QMinilock.cpp QMinilock.h 
-    QMinilockWorker.h 
+    QMinilockWorker.cpp QMinilockWorker.h 
     ${QT_RESOURCES})
 
 target_include_directories(minilock PRIVATE 

@@ -24,7 +24,7 @@
 cmake_minimum_required(VERSION 3.16)
 set(VCPKG_VERSION edge)
 include(cmake/vcpkg.cmake)
-project(minilockcpp)
+project(minilockcpp VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 
 
@@ -38,6 +38,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 ## minilock build options
 ###########################################################################
 option(BUILD_UNITTESTS "Build unit tests" ON)
+option(BUILD_GUI "Build Qt5 GUI" ON)
 
 
 ###########################################################################

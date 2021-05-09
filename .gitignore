@@ -1,6 +1,4 @@
-bin/
 build/
 install/
-extern/
 .vs
 .vscode
